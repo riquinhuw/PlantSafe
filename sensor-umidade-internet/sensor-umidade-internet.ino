@@ -1,3 +1,8 @@
+
+#include <ArduinoJson.h>
+#include <Ethernet.h>
+#include <SPI.h>
+
 const int pinoSensor = A0; //PINO UTILIZADO PELO SENSOR
 int valorLido; //VARIÁVEL QUE ARMAZENA O PERCENTUAL DE UMIDADE DO SOLO
 
@@ -11,20 +16,17 @@ void setup(){
  pinMode(7, OUTPUT);
  Serial.println("Lendo a umidade do solo..."); //IMPRIME O TEXTO NO MONITOR SERIAL
  delay(2000); //INTERVALO DE 2 SEGUNDOS
+  
 }
  
 void loop(){  
   
-  
-  if(medirUmidade()<45){
-    Serial.println("Umidade abaixo do limite configurado, regando");
-    Serial.println("Abrindo a corrente");
-    digitalWrite(7,HIGH);
-    delay(2000);
-    Serial.println("Fechando a corrente");
-    digitalWrite(7,LOW);
+  if(medirUmidade()<1){//default 45
+    //pegar os dados do momento e jogar no BD
+    liberarAgua();
     }
   delay(1000);  //INTERVALO DE 1 SEGUNDO
+
 }
 
 int medirUmidade(){
@@ -34,5 +36,17 @@ int medirUmidade(){
  Serial.print(valorLido); //IMPRIME NO MONITOR SERIAL O PERCENTUAL DE UMIDADE DO SOLO
  Serial.println("%"); //IMPRIME O CARACTERE NO MONITOR SERIAL
  return valorLido;
+  
+  }
+
+ void liberarAgua(){
+    Serial.println("Umidade abaixo do limite configurado, regando");
+    Serial.println("Abrindo a corrente");
+    digitalWrite(7,HIGH); 
+    delay(7000);// liberando água por 7 segundos
+    Serial.println("Fechando a corrente");
+    digitalWrite(7,LOW);
+    Serial.println("Esperando a água -parar-");
+    delay(15000);//delay de 15s
   
   }
