@@ -81,17 +81,28 @@ void setup() {
   Serial.print("connecting to ");
   Serial.print(server);
   Serial.println("...");
+  /*
   const size_t CAPACITY = JSON_OBJECT_SIZE(2);
   StaticJsonDocument<CAPACITY> doc;
   JsonObject root = doc.to<JsonObject>();
   root["name"] = "Put In BD";
   root["email"] = "now@go.com";
-  serializeJson(doc, Serial);
+  serializeJson(doc, Serial);*/
+  DynamicJsonBuffer jBuffer;
+  JsonObject& root = jBuffer.createObject();
+
+  root["name"] = "Put In BD";
+  root["email"] = "now@go.com";
+
+  //root.prettyPrintTo();
+  
+  
   
 
   // if you get a connection, report back via serial:
   if (client.connect(server, 80)) {
     Serial.print("connected to ");
+    //Serial.print("NOme"+nome+"EMAIL"+emaill);
     Serial.println(client.remoteIP());
     // Make a HTTP request:
   client.print("POST ");
@@ -105,8 +116,9 @@ void setup() {
   client.println(root.size());
   //client.print("\r\n");
   client.println();
-  client.print(root);
+  //client.print("{\"name\":\"AGORA\",\"email\":\"VAI@mado.doceu\"}");
   //root.printTo(client);
+    root.prettyPrintTo(client);
   Serial.println("TENTOU ENVIAR VIU?");
   client.flush();
   client.stop();
