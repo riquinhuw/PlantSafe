@@ -25,7 +25,7 @@ void loop() {
   HttpClient client;
   client.setHeader("Content-Type: application/json");
   String httpBody = var;
-  String httpDestination = "http://plantsafe.herokuapp.com/users/"; //URL Sever 
+  String httpDestination = "http://site.com/POST/"; //URL Sever 
   client.post(httpDestination, httpBody);
 
   if (client.read() == 123) {

@@ -25,7 +25,7 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // if you don't want to use DNS (and reduce your sketch size)
 // use the numeric IP instead of the name for the server:
 //IPAddress server(52,4,49,82);  // numeric IP for Google (no DNS)
-char server[] = "plantsafe.herokuapp.com";    // name address for Google (using DNS)
+char server[] = "suaapi.com";    // name address for Google (using DNS)
 
 // Set the static IP address to use if the DHCP fails to assign
 IPAddress ip(10, 3, 3, 173);
@@ -106,10 +106,10 @@ void setup() {
     Serial.println(client.remoteIP());
     // Make a HTTP request:
   client.print("POST ");
-  client.print("/users");
+  client.print("/postt");
   client.println(" HTTP/1.1");
   client.print("Host: ");
-  client.println("plantsafe.herokuapp.com");
+  client.println("seusite.com");
   client.println("Content-Type: application/json");
   client.println("Connection: close\r\n");
   client.print("Content-Length:");

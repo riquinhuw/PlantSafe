@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
  
-const char* ssid = "NOMEDAREDE";
-const char* password =  "SENHADAREDE";
+const char* ssid = "NOME DA REDE";
+const char* password =  "SENHA DA REDE";
  
 void setup() {
  
@@ -20,12 +20,12 @@ void setup() {
 }
  
 void loop() {
-   String var = "{\"name\":\"AGORA\",\"email\":\"VAI@mado.doceu\"}";
+   String var = "{\"name\":\"Marco\",\"email\":\"marco@mail.com\"}";
  if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
  
    HTTPClient http;   
  
-   http.begin("http://seulink.com/post");  //Specify destination for HTTP request
+   http.begin("http://site.com/post");  //Specify destination for HTTP request
    http.addHeader("Content-Type", "application/json");             //Specify content-type header
  
    int httpResponseCode = http.POST(var);   //Send the actual POST request
