@@ -8,8 +8,8 @@ Irrigação automatica baseada na umidade do solo.
 ## Metas
 
 - [X] Sensor de Umidade
-- [ ] Valvula de água
-- [ ] Exibir no Monitor
+- [X] Valvula de água
+- [X] Exibir no Monitor
 
 ------------------------
 
@@ -27,4 +27,5 @@ Irrigação automatica baseada na umidade do solo.
 _02/11/2019_
 https://blogmasterwalkershop.com.br/arduino/como-usar-com-arduino-sensor-medidor-de-umidade-do-solo-higrometro/
 
+Desisti de colocar todas as fontes, pois usei muitas fontes.
 
