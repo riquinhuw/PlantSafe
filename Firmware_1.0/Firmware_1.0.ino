@@ -11,13 +11,14 @@
 
  /* Variaveis para internet  */
 
-const char* ssid = "NOME DA REDE";
-const char* password =  "SENHA";
+const char* ssid = "SEU WIFI";
+const char* password =  "SENHA DO WIFI";
+
 
  /* Variaveis para Sensor de humidade  */
 
 int    umidade =0;
-int percentUmidade = 30;
+int percentUmidade = 35;
 int rele=32;
 int led=26;
 const int pinoSensor = 35; //PINO UTILIZADO PELO SENSOR
@@ -56,7 +57,10 @@ void escreverUmidade(int valor){
 
 
 void internetConectar(){
+    Serial.println("tentand conectar");
     WiFi.begin(ssid, password); 
+    // WiFi.localIP().toString() == "0.0.0.0" WiFi.status() != WL_CONNECTED
+    Serial.println("passou wifi e senha");
     while (WiFi.status() != WL_CONNECTED) { //Check for the connection
       delay(1000);
       Serial.println("Connecting to WiFi..");
@@ -65,25 +69,27 @@ void internetConectar(){
     Serial.println("Connected to the WiFi network");
   }
 
-void internetPost(int name){
-        String var = "{\"name\":\"FROM\",\"email\":\"Ware@mail.com\"}"; // montando o Json
+void internetPost(int umidade,bool regada){
+        //String var = "{\"name\":\"FROM\",\"email\":\"Ware@mail.com\"}"; // montando o Json
         const size_t CAPACITY = JSON_OBJECT_SIZE(2);
         StaticJsonDocument<CAPACITY> doc;
         JsonObject root = doc.to<JsonObject>();
-        root["name"] = name;
-        root["email"] = "now@go.com";
+        root["umidade"] = umidade;
+        root["regada"] = regada;
         //serializeJson(doc, Serial);
         String enviar;
         serializeJson(doc, enviar);
         
      if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
      
-       HTTPClient http;   
+       HTTPClient http;
+       http.useHTTP10();
+       http.setReuse(true); 
      
-       http.begin("http://seusite.com/post");  //Especificando o link/rota
+       http.begin("http://suaAPI.com/POST");  //Especificando o link/rota
        http.addHeader("Content-Type", "application/json");   //Especificando que é Json
      
-       int httpResponseCode = http.POST(enviar  );   //Envia o Json via POST
+       int httpResponseCode = http.POST(enviar);   //Envia o Json via POST
      
        if(httpResponseCode>0){
      
@@ -96,16 +102,18 @@ void internetPost(int name){
      
         Serial.print("Erro ao enviar o POST: ");
         Serial.println(httpResponseCode);
+        Serial.println(WiFi.localIP().toString());
      
        }
      
        http.end();  //Liberar os recursos
-     
      }else{
      
         Serial.println("Erro na conexão WiFi");
+        Serial.println(WiFi.status());
      }
-  
+
+    WiFi.disconnect();// Disconecto do wifi, porque fica dando erro -1 ( o serv recusa)
   }
 
   void intro(){
@@ -125,11 +133,6 @@ void setup() {
   pinMode(rele, OUTPUT);
   intro();
 
-  
-
-
-  
-
 }
 
 void loop() {
@@ -138,15 +141,20 @@ void loop() {
     escreverUmidade(umidade);
     liberarAgua();
     internetConectar();
-    internetPost(umidade);
+    internetPost(umidade,true);
     }else{
       escreverUmidade(umidade);     
       contadorDeVerificacao++;
 
-      if(contador>30)//depois de 5 minutos ele vai enviar para o banco a informação
-      
+      if(contadorDeVerificacao>30){//depois de 5 minutos ele vai enviar para o banco a informação
+          Serial.println("O contador está em: "+contadorDeVerificacao);
+          Serial.println("vai conectar");
          internetConectar();
-         internetPost(umidade);//falta enviar a temp(bonus) e se foi regado ou N em forma de bool
+         Serial.println("vai enviar ");
+         internetPost(umidade,false);//falta enviar a temp(bonus) e se foi regado ou N em forma de bool
+         contadorDeVerificacao =0;
+         Serial.println("Agora em: "+contadorDeVerificacao);
+        }
       }
   delay(10000); //A cada 10s ele verifica novamente
 }
