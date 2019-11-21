@@ -27,7 +27,7 @@ int analogSoloSeco = 4095; //VALOR MEDIDO COM O SOLO SECO (VOCÊ PODE FAZER TEST
 int analogSoloMolhado = 1800; //VALOR MEDIDO COM O SOLO MOLHADO (VOCÊ PODE FAZER TESTES E AJUSTAR ESTE VALOR)
 int percSoloSeco = 0; //MENOR PERCENTUAL DO SOLO SECO (0% - NÃO ALTERAR)
 int percSoloMolhado = 100; //MAIOR PERCENTUAL DO SOLO MOLHADO (100% - NÃO ALTERAR)
-
+String verificarManual;
  /* Variaveis auxiliares  */
  int contadorDeVerificacao=0;
 
@@ -57,14 +57,16 @@ void escreverUmidade(int valor){
 
 
 void internetConectar(){
-    Serial.println("tentand conectar");
+    //Serial.println("tentand conectar");
     WiFi.begin(ssid, password); 
     // WiFi.localIP().toString() == "0.0.0.0" WiFi.status() != WL_CONNECTED
-    Serial.println("passou wifi e senha");
+    //Serial.println("passou wifi e senha");
+    Serial.print("Connecting to WiFi..");
     while (WiFi.status() != WL_CONNECTED) { //Check for the connection
       delay(1000);
-      Serial.println("Connecting to WiFi..");
+      Serial.print(".");
     }
+    Serial.println("\n");
    
     Serial.println("Connected to the WiFi network");
   }
@@ -86,7 +88,7 @@ void internetPost(int umidade,bool regada){
        http.useHTTP10();
        http.setReuse(true); 
      
-       http.begin("http://SuaApi/Post");  //Especificando o link/rota
+       http.begin("http://suaAPI.com/POST");  //Especificando o link/rota
        http.addHeader("Content-Type", "application/json");   //Especificando que é Json
      
        int httpResponseCode = http.POST(enviar);   //Envia o Json via POST
@@ -116,16 +118,48 @@ void internetPost(int umidade,bool regada){
     WiFi.disconnect();// Disconecto do wifi, porque fica dando erro -1 ( o serv recusa)
   }
 
+  void internetGetComando(){     
+    String retorno;   
+     if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
+     
+       HTTPClient http;
+       http.useHTTP10();
+       http.setReuse(true); 
+     
+       http.begin("http://plantsafe.herokuapp.com/regar");  //Especificando o link/rota
+       int httpResponseCode = http.GET();   //Envia o Json via POST
+     
+       if(httpResponseCode>0){
+        String response = http.getString();    //Retorna o "feedback"
+        //Serial.println(httpResponseCode);   //Retorna o codigo de status
+        //Serial.println(response);           //Retorna o conteúdo
+        //Serial.println(response.charAt(10));
+        verificarManual = response;
+        http.begin("http://SuaApi.com/Getzão");//para desativar
+        httpResponseCode = http.GET();
+       }else{
+        Serial.print("Erro ao solicitar o GET: ");
+        Serial.println(httpResponseCode);
+        Serial.println(WiFi.localIP().toString());
+       }
+     
+       http.end();  //Liberar os recursos
+     }else{
+     
+        Serial.println("Erro na conexão WiFi");
+        Serial.println(WiFi.status());
+     }
+
+    WiFi.disconnect();// Disconecto do wifi, porque fica dando erro -1 ( o serv recusa)
+    
+  }
+
   void intro(){
       Serial.println("Iniciando sistema Plant Safe 1.0");
       Serial.print("Carregando");
       int i =0;
       for(i=0;i<11;i++){Serial.print(".");delay(500);}
       Serial.println("\nPlant Safe carregado!");
-      Serial.println(analogRead(pinoSensor));
-      
-      
-    
     }
 
 void setup() {
@@ -137,7 +171,16 @@ void setup() {
 }
 
 void loop() {
-     umidade = medirUmidade();
+  umidade = medirUmidade();
+  Serial.println("Verificando se existe comando pedente");
+  internetConectar();
+  internetGetComando();
+  if(verificarManual.charAt(10) =='1'){
+    escreverUmidade(umidade);
+    liberarAgua();
+    internetConectar();
+    internetPost(umidade,true);
+    }else{
   if(umidade<percentUmidade){
     escreverUmidade(umidade);
     liberarAgua();
@@ -157,5 +200,7 @@ void loop() {
          Serial.println("Agora em: "+contadorDeVerificacao);
         }
       }
+}//fim do else da regada manual
+WiFi.disconnect();
   delay(10000); //A cada 10s ele verifica novamente
 }
